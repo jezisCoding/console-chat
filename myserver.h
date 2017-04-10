@@ -23,6 +23,9 @@ public:
 private:
     QTcpServer *server;
 
+    QList<QTcpSocket> cliSocks;
+    std::string wallMsg;
+
 signals:
 
 public slots:

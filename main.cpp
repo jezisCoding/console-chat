@@ -15,15 +15,18 @@ int main(int argc, char *argv[])
         std::cin >> choice;
     } while(choice != 1 && choice != 2);
 
+    MyClient *instance;
     if(choice == 1) {
-        MyServer ms;
-        ms.run();
+        instance = new MyServer;
+        instance->run();
     } else {
-        MyClient mc;
-        mc.run();
+        instance = new MyClient;
+        instance->run();
     }
 
-    return a.exec();
+    int returned = a.exec();
+    delete instance;
+    return returned;
 }
 
 /* choose to host or connect

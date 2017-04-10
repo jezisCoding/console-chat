@@ -10,17 +10,18 @@ MyServer::MyServer(QObject *parent) : MyClient(parent)
 
 void MyServer::run()
 {
-    std::string host;
+    /*std::string host;
     int port;
 
     std::printf("Host address: ");
     std::cin >> host;
     std::printf("Host port: ");
     std::cin >> port;
-    std::cin.sync();    //flush buffer so getline doesnt skip input after cin >>...
+    std::cin.sync();*/    //flush buffer so getline doesnt skip input after cin >>...
 
-    if(!server->listen(QHostAddress(host.c_str()), port)){
+    if(!server->listen(QHostAddress("localhost"), 1337/*QHostAddress(host.c_str()), port)*/)){
         qDebug() << "*Not listening!*";
+        qDebug() << "*Error: " << server->errorString() << "*";
     } else {
         qDebug() << "*Listening!*";
     }

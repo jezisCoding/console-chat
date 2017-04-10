@@ -16,7 +16,7 @@ class MyClient : public QObject
 public:
     explicit MyClient(QObject *parent = 0);
 
-    void run();
+    virtual void run();
 
 signals:
     void messageWritten();
@@ -35,8 +35,6 @@ public slots:
     void getMsg();
     void exitApplication();
     void error(QAbstractSocket::SocketError errora);
-
-    void hostFound();
 };
 
 #endif // QCLIENT_H
