@@ -15,26 +15,31 @@ class MyClient : public QObject
     Q_OBJECT
 public:
     explicit MyClient(QObject *parent = 0);
-
+    ~MyClient();
     virtual void run();
+
+protected:
+    QString message;
+    QString nickname;
+    QMutex mutex;
+
+private:
+    QTcpSocket *cliSocket;
 
 signals:
     void messageWritten();
 
-protected:
-    QTcpSocket *cliSocket;
-    std::string message;
-    QMutex mutex;
-
 public slots:
+    virtual void readyRead();
     void createMsgThread();
+    virtual void writeMsg();
+    void getMsg();
+    virtual void exitApplication();
+    void error(QAbstractSocket::SocketError errora);
+
+private slots:
     void disconnected();
     void connected();
-    void readyRead();
-    void writeMsg();
-    void getMsg();
-    void exitApplication();
-    void error(QAbstractSocket::SocketError errora);
 };
 
 #endif // QCLIENT_H

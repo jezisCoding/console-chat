@@ -26,6 +26,7 @@ int main(int argc, char *argv[])
 
     int returned = a.exec();
     delete instance;
+    std::cout << std::endl;
     return returned;
 }
 
@@ -33,5 +34,6 @@ int main(int argc, char *argv[])
  * disconnect/exit fluently
  * more simultaneous clients, all get messages on board
  * abstraktna nadtrieda ser a cli
+ * encryption
  * TESTED ONLY ON LAN, reccomended input localhost:1337
  */

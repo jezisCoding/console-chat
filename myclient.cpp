@@ -2,14 +2,17 @@
 
 MyClient::MyClient(QObject *parent) : QObject(parent)
 {
-    cliSocket = new QTcpSocket(this);
-
     connect(this, SIGNAL(messageWritten()), this, SLOT(exitApplication()),
-            Qt::ConnectionType::QueuedConnection);
-    connect(this, SIGNAL(messageWritten()), this, SLOT(writeMsg()),
             Qt::ConnectionType::QueuedConnection);
     connect(this, SIGNAL(messageWritten()), this, SLOT(createMsgThread()),
             Qt::ConnectionType::QueuedConnection);
+    connect(this, SIGNAL(messageWritten()), this, SLOT(writeMsg()),
+            Qt::ConnectionType::QueuedConnection);
+}
+
+MyClient::~MyClient()
+{
+
 }
 
 void MyClient::run()
@@ -21,7 +24,12 @@ void MyClient::run()
     std::cin >> host;
     std::printf("Host port: ");
     std::cin >> port;
+    std::printf("Your nickname: ");
+    std::cin >> nickname;
     std::cin.sync();*/    //flush buffer so getline doesnt skip input after cin >>...
+    nickname = "client1";
+
+    cliSocket = new QTcpSocket(this);
 
     connect(cliSocket, SIGNAL(connected()), this, SLOT(connected()));
     connect(cliSocket, SIGNAL(disconnected()), this, SLOT(disconnected()));
@@ -29,29 +37,6 @@ void MyClient::run()
     connect(cliSocket, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(error(QAbstractSocket::SocketError)));
 
     cliSocket->connectToHost("localhost", 1337/*host.c_str(), port*/);
-}
-
-void MyClient::createMsgThread()
-{
-    QFuture<void> fvoid = QtConcurrent::run(this, &getMsg);
-    //fvoid.waitForFinished();
-}
-
-void MyClient::getMsg()
-{
-    QMutexLocker locker(&mutex);
-
-    std::getline(std::cin, message);
-
-    emit messageWritten();
-}
-
-void MyClient::exitApplication()
-{
-    if(message == "quit"){
-        cliSocket->close();
-        QCoreApplication::quit();
-    }
 }
 
 void MyClient::connected()
@@ -72,17 +57,53 @@ void MyClient::disconnected()
 
 void MyClient::readyRead()
 {
-    qDebug() << "Other: " << cliSocket->readAll();
+    qDebug() << cliSocket->readAll();
+}
+
+void MyClient::createMsgThread()
+{
+    QFuture<void> fvoid = QtConcurrent::run(this, &getMsg);
+    //fvoid.waitForFinished();
 }
 
 void MyClient::writeMsg()
 {
-    cliSocket->write(message.c_str());
+    cliSocket->write(nickname.toUtf8() + ": " + message.toUtf8());
     cliSocket->flush();
     cliSocket->waitForBytesWritten();
 }
 
+void MyClient::getMsg()
+{
+    QMutexLocker locker(&mutex);
+
+    std::string msg;
+    std::cin.sync();    //skipping again
+    std::getline(std::cin, msg);
+    message = QString(msg.c_str());
+
+    //if quit exitapp
+    //write
+    //createmsgthread NOT, only getmsg?
+
+    emit messageWritten();
+}
+
+void MyClient::exitApplication()
+{
+    if(message == "quit"){
+        mutex.unlock();
+        cliSocket->disconnectFromHost();
+        QCoreApplication::quit();
+    }
+}
+
 void MyClient::error(QAbstractSocket::SocketError errora)
 {
-    qDebug() << "*Error: " << errora << "*";
+    if(errora == QAbstractSocket::SocketError::RemoteHostClosedError){
+        qDebug() << "*Host closed the connection!*";
+        exitApplication();
+    }
+
+    else qDebug() << "*Error: " << errora << "*";
 }
