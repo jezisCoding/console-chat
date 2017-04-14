@@ -18,7 +18,6 @@ class MyServer : public MyClient
     Q_OBJECT
 public:
     explicit MyServer(QObject *parent = 0);
-    ~MyServer();
     void run();
 
 private:
@@ -30,11 +29,10 @@ signals:
 public slots:
     void exitApplication();
     void newConnection();
-    void clientDcd();
     void readyRead();
     void writeMsg();
-
-    void broadcastMsg(QByteArray msg);
+    void error(QAbstractSocket::SocketError errora);
+    void broadcastMsg(QByteArray msg, QTcpSocket *except);
 };
 
 #endif // QSERVER_H

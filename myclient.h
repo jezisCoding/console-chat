@@ -15,12 +15,12 @@ class MyClient : public QObject
     Q_OBJECT
 public:
     explicit MyClient(QObject *parent = 0);
-    ~MyClient();
     virtual void run();
 
 protected:
     QString message;
     QString nickname;
+    QFuture<void> fvoid;
     QMutex mutex;
 
 private:
